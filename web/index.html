@@ -4,15 +4,6 @@
 <style>
 html, body { padding: 0; margin: 0; }
 html, body, #map { height: 100% }
-.text-label span {
-    color: black;
-    background: white;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-size: 12px;
-    white-space: nowrap;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5);
-}
 .circle-text span {
     color: white;
     font-size: 14px;
@@ -30,21 +21,23 @@ html, body, #map { height: 100% }
 <script>
 var map = L.map('map').setView([44.0994213,-120.6629185], 7);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: 6,
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+const numbers = L.layerGroup();
 for (const s of DATA) {
   if (!s.lat) continue;
   const score = s.subjects?.english;
   if (!score) continue;
 
-  const circle = L.circle([s.lat, s.long], {
+  const circle = L.circleMarker([s.lat, s.long], {
       color: 'none',
       fillColor: `hsl(${score} 100% 40%)`,
-      fillOpacity: 0.8,
-      radius: 500
-  }).addTo(map).bindPopup(`${s.name}`);
+      fillOpacity: 0.7,
+      radius: 20
+  }).addTo(map).bindPopup(`${s.name}: ${score}`);
 
   const text = L.marker([s.lat, s.long], {
       icon: L.divIcon({
@@ -52,6 +45,15 @@ for (const s of DATA) {
           html: `<span>${score.toFixed(0)}</span>`,
       }),
       interactive: false
-  }).addTo(map);
+  }).addTo(numbers);
 }
+
+map.on('zoomend', () => {
+  if (map.getZoom() < 12) {
+    map.removeLayer(numbers);
+  } else {
+    map.addLayer(numbers);
+  }
+});
+
 </script>
