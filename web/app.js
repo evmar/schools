@@ -59,6 +59,11 @@ render(DATA, "math");
 
 const x = L.Control.extend({
   onAdd(map) {
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+    container.style.gap = "10px";
+
     const sel = document.createElement("select");
     for (const f of ["math", "english"]) {
       const opt = document.createElement("option");
@@ -68,7 +73,50 @@ const x = L.Control.extend({
     L.DomEvent.on(sel, "change", () => {
       render(DATA, sel.value);
     });
-    return sel;
+    container.appendChild(sel);
+
+    const button = document.createElement("button");
+    button.innerText = "What's this?";
+    button.popoverTargetAction = "toggle";
+    container.appendChild(button);
+
+    const panel = document.createElement("div");
+    panel.innerHTML = `
+      <p>
+        Oregon ranks 50th in US states for 4th grade reading scores.
+        <a href='https://www.wweek.com/news/state/2025/11/13/christine-pitts-has-spotted-one-key-reason-oregon-kids-arent-learning-to-read/'>This article discusses why</a>.
+      </p>
+      <p>
+        I was curious: how do the schools within Oregon compare?
+        The test used for the national ranking is not available at the level of schools, but the state conducts
+        its own <a href='https://www.oregon.gov/ode/educator-resources/assessment/Pages/Statewide-Assessments.aspx'>statewide assessments</a>.
+      </p>
+      <p>
+        This map displays the results for math or English.
+        The scores (shown as numbers when you zoom in) are the percentage of students scoring at the level the state deems "proficient".
+        (Warning: the state website has mountains of text and data on it but what the actual numbers mean is extremely difficult to figure out!)
+      </p>
+      <p>
+        If you're interested in more details on a particular school, the <a href='https://www.ode.state.or.us/data/ReportCard/'>at-a-glance profile site</a>
+        generates nice reports &mdash; though for some reason it only shows proficiency scores for elementary/middle schools, not high schools.
+      </p>
+      <p>
+        Disclaimer: site is a quick hack; schools I failed to geolocate are omitted.  <a href='https://github.com/evmar/schools'>Source code here</a>.
+      </p>
+    `;
+    panel.style.backgroundColor = "white";
+    panel.style.border = "1px solid #ccc";
+    panel.style.padding = "0 2ex";
+    panel.style.borderRadius = "5px";
+    panel.style.boxShadow = "0 2px 5px rgba(0, 0, 0, 0.3)";
+    panel.style.fontSize = "16px";
+    panel.style.maxWidth = "60ex";
+    panel.popover = "auto";
+    container.appendChild(panel);
+
+    button.popoverTargetElement = panel;
+
+    return container;
   },
 });
 new x({ position: "topright" }).addTo(map);
